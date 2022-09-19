@@ -19,7 +19,7 @@ The main purpose of this project is to provide a pipeline for mod development on
 - Familiarity installing and enabling mods in The Sims 4
 
 #### I also highly recommend...
-- Sims 4 Mod Manager (will include a link when I find it again!)
+- [The Sims 4 Ultimate Mod Manager](https://modthesims.info/d/629008/the-sims-4-ultimate-mod-manager-v1-2-subfolder-support.html)
 
 ### Set up for development on Mac
 1. Fork this repo in GitHub. Clone the copy to your Mac.
