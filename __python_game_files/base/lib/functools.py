@@ -1,13 +1,13 @@
-# uncompyle6 version 3.7.4
-# Python bytecode 3.7 (3394)
+# decompyle3 version 3.9.0
+# Python bytecode version base 3.7.0 (3394)
 # Decompiled from: Python 3.7.9 (tags/v3.7.9:13c94747c7, Aug 17 2020, 18:58:18) [MSC v.1900 64 bit (AMD64)]
 # Embedded file name: T:\InGame\Gameplay\Scripts\Lib\functools.py
 # Compiled at: 2018-06-26 23:07:36
 # Size of source mod 2**32: 33027 bytes
 __all__ = [
- 'update_wrapper', 'wraps', 'WRAPPER_ASSIGNMENTS', 'WRAPPER_UPDATES',
- 'total_ordering', 'cmp_to_key', 'lru_cache', 'reduce', 'partial',
- 'partialmethod', 'singledispatch']
+ 'update_wrapper','wraps','WRAPPER_ASSIGNMENTS','WRAPPER_UPDATES',
+ 'total_ordering','cmp_to_key','lru_cache','reduce','partial',
+ 'partialmethod','singledispatch']
 try:
     from _functools import reduce
 except ImportError:
@@ -151,7 +151,7 @@ _convert = {'__lt__':[
    '__lt__', _lt_from_ge)]}
 
 def total_ordering(cls):
-    roots = {op for op in _convert if getattr(cls, op, None) is not getattr(object, op, None)}
+    roots = {op for op in  if getattr(cls, op, None) is not getattr(object, op, None)}
     if not roots:
         raise ValueError('must define at least one ordering operation: < > <= >=')
     root = max(roots)
@@ -203,11 +203,11 @@ class partial:
     def __new__(*args, **keywords):
         if not args:
             raise TypeError("descriptor '__new__' of partial needs an argument")
-        else:
-            if len(args) < 2:
-                raise TypeError("type 'partial' takes at least one argument")
-            cls, func, *args = args
-            assert callable(func), 'the first argument must be callable'
+        if len(args) < 2:
+            raise TypeError("type 'partial' takes at least one argument")
+        cls, func, *args = args
+        if not callable(func):
+            raise TypeError('the first argument must be callable')
         args = tuple(args)
         if hasattr(func, 'func'):
             args = func.args + args
@@ -246,141 +246,29 @@ class partial:
          (self.func, self.args,
           self.keywords or None, self.__dict__ or None))
 
-    def __setstate__--- This code section failed: ---
-
- L. 289         0  LOAD_GLOBAL              isinstance
-                2  LOAD_FAST                'state'
-                4  LOAD_GLOBAL              tuple
-                6  CALL_FUNCTION_2       2  '2 positional arguments'
-                8  POP_JUMP_IF_TRUE     18  'to 18'
-
- L. 290        10  LOAD_GLOBAL              TypeError
-               12  LOAD_STR                 'argument to __setstate__ must be a tuple'
-               14  CALL_FUNCTION_1       1  '1 positional argument'
-               16  RAISE_VARARGS_1       1  'exception instance'
-             18_0  COME_FROM             8  '8'
-
- L. 291        18  LOAD_GLOBAL              len
-               20  LOAD_FAST                'state'
-               22  CALL_FUNCTION_1       1  '1 positional argument'
-               24  LOAD_CONST               4
-               26  COMPARE_OP               !=
-               28  POP_JUMP_IF_FALSE    48  'to 48'
-
- L. 292        30  LOAD_GLOBAL              TypeError
-               32  LOAD_STR                 'expected 4 items in state, got '
-               34  LOAD_GLOBAL              len
-               36  LOAD_FAST                'state'
-               38  CALL_FUNCTION_1       1  '1 positional argument'
-               40  FORMAT_VALUE          0  ''
-               42  BUILD_STRING_2        2 
-               44  CALL_FUNCTION_1       1  '1 positional argument'
-               46  RAISE_VARARGS_1       1  'exception instance'
-             48_0  COME_FROM            28  '28'
-
- L. 293        48  LOAD_FAST                'state'
-               50  UNPACK_SEQUENCE_4     4 
-               52  STORE_FAST               'func'
-               54  STORE_FAST               'args'
-               56  STORE_FAST               'kwds'
-               58  STORE_FAST               'namespace'
-
- L. 294        60  LOAD_GLOBAL              callable
-               62  LOAD_FAST                'func'
-               64  CALL_FUNCTION_1       1  '1 positional argument'
-               66  POP_JUMP_IF_FALSE   114  'to 114'
-               68  LOAD_GLOBAL              isinstance
-               70  LOAD_FAST                'args'
-               72  LOAD_GLOBAL              tuple
-               74  CALL_FUNCTION_2       2  '2 positional arguments'
-               76  POP_JUMP_IF_FALSE   114  'to 114'
-
- L. 295        78  LOAD_FAST                'kwds'
-               80  LOAD_CONST               None
-               82  COMPARE_OP               is-not
-               84  POP_JUMP_IF_FALSE    96  'to 96'
-               86  LOAD_GLOBAL              isinstance
-               88  LOAD_FAST                'kwds'
-               90  LOAD_GLOBAL              dict
-               92  CALL_FUNCTION_2       2  '2 positional arguments'
-               94  POP_JUMP_IF_FALSE   114  'to 114'
-             96_0  COME_FROM            84  '84'
-
- L. 296        96  LOAD_FAST                'namespace'
-               98  LOAD_CONST               None
-              100  COMPARE_OP               is-not
-              102  POP_JUMP_IF_FALSE   122  'to 122'
-              104  LOAD_GLOBAL              isinstance
-              106  LOAD_FAST                'namespace'
-              108  LOAD_GLOBAL              dict
-              110  CALL_FUNCTION_2       2  '2 positional arguments'
-              112  POP_JUMP_IF_TRUE    122  'to 122'
-            114_0  COME_FROM            94  '94'
-            114_1  COME_FROM            76  '76'
-            114_2  COME_FROM            66  '66'
-
- L. 297       114  LOAD_GLOBAL              TypeError
-              116  LOAD_STR                 'invalid partial state'
-              118  CALL_FUNCTION_1       1  '1 positional argument'
-              120  RAISE_VARARGS_1       1  'exception instance'
-            122_0  COME_FROM           112  '112'
-            122_1  COME_FROM           102  '102'
-
- L. 299       122  LOAD_GLOBAL              tuple
-              124  LOAD_FAST                'args'
-              126  CALL_FUNCTION_1       1  '1 positional argument'
-              128  STORE_FAST               'args'
-
- L. 300       130  LOAD_FAST                'kwds'
-              132  LOAD_CONST               None
-              134  COMPARE_OP               is
-              136  POP_JUMP_IF_FALSE   144  'to 144'
-
- L. 301       138  BUILD_MAP_0           0 
-              140  STORE_FAST               'kwds'
-              142  JUMP_FORWARD        164  'to 164'
-            144_0  COME_FROM           136  '136'
-
- L. 302       144  LOAD_GLOBAL              type
-              146  LOAD_FAST                'kwds'
-              148  CALL_FUNCTION_1       1  '1 positional argument'
-              150  LOAD_GLOBAL              dict
-              152  COMPARE_OP               is-not
-              154  POP_JUMP_IF_FALSE   164  'to 164'
-
- L. 303       156  LOAD_GLOBAL              dict
-              158  LOAD_FAST                'kwds'
-              160  CALL_FUNCTION_1       1  '1 positional argument'
-              162  STORE_FAST               'kwds'
-            164_0  COME_FROM           154  '154'
-            164_1  COME_FROM           142  '142'
-
- L. 304       164  LOAD_FAST                'namespace'
-              166  LOAD_CONST               None
-              168  COMPARE_OP               is
-              170  POP_JUMP_IF_FALSE   176  'to 176'
-
- L. 305       172  BUILD_MAP_0           0 
-              174  STORE_FAST               'namespace'
-            176_0  COME_FROM           170  '170'
-
- L. 307       176  LOAD_FAST                'namespace'
-              178  LOAD_FAST                'self'
-              180  STORE_ATTR               __dict__
-
- L. 308       182  LOAD_FAST                'func'
-              184  LOAD_FAST                'self'
-              186  STORE_ATTR               func
-
- L. 309       188  LOAD_FAST                'args'
-              190  LOAD_FAST                'self'
-              192  STORE_ATTR               args
-
- L. 310       194  LOAD_FAST                'kwds'
-              196  LOAD_FAST                'self'
-              198  STORE_ATTR               keywords
-
-Parse error at or near `COME_FROM' instruction at offset 122_0
+    def __setstate__(self, state):
+        if not isinstance(state, tuple):
+            raise TypeError('argument to __setstate__ must be a tuple')
+        if len(state) != 4:
+            raise TypeError(f"expected 4 items in state, got {len(state)}")
+        func, args, kwds, namespace = state
+        if callable(func):
+            if isinstance(args, tuple):
+                if not kwds is not None or isinstance(kwds, dict):
+                    if not (namespace is not None and isinstance(namespace, dict)):
+                        raise TypeError('invalid partial state')
+                    args = tuple(args)
+                    if kwds is None:
+                        kwds = {}
+                    else:
+                        if type(kwds) is not dict:
+                            kwds = dict(kwds)
+                    if namespace is None:
+                        namespace = {}
+                    self.__dict__ = namespace
+                    self.func = func
+                    self.args = args
+                    self.keywords = kwds
 
 
 try:
@@ -394,7 +282,7 @@ class partialmethod(object):
         if not callable(func):
             if not hasattr(func, '__get__'):
                 raise TypeError('{!r} is not callable or a descriptor'.format(func))
-        elif isinstance(func, partialmethod):
+        if isinstance(func, partialmethod):
             self.func = func.func
             self.args = func.args + args
             self.keywords = func.keywords.copy()
@@ -438,9 +326,9 @@ class partialmethod(object):
                 except AttributeError:
                     pass
 
-        if result is None:
-            result = self._make_unbound_method().__get__(obj, cls)
-        return result
+                if result is None:
+                    result = self._make_unbound_method().__get__(obj, cls)
+            return result
 
     @property
     def __isabstractmethod__(self):
@@ -469,13 +357,14 @@ def _make_key(args, kwds, typed, kwd_mark=(
         for item in kwds.items():
             key += item
 
-    elif typed:
+    if typed:
         key += tuple((type(v) for v in args))
         if kwds:
             key += tuple((type(v) for v in kwds.values()))
-    elif len(key) == 1:
-        if type(key[0]) in fasttypes:
-            return key[0]
+    else:
+        if len(key) == 1:
+            if type(key[0]) in fasttypes:
+                return key[0]
     return _HashedSeq(key)
 
 
@@ -484,11 +373,11 @@ def lru_cache(maxsize=128, typed=False):
         if not isinstance(maxsize, int):
             raise TypeError('Expected maxsize to be an integer or None')
 
-    def decorating_function(user_function):
-        wrapper = _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo)
-        return update_wrapper(wrapper, user_function)
+        def decorating_function(user_function):
+            wrapper = _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo)
+            return update_wrapper(wrapper, user_function)
 
-    return decorating_function
+        return decorating_function
 
 
 def _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
@@ -551,21 +440,22 @@ def _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
                 with lock:
                     if key in cache:
                         pass
-                    elif full:
-                        oldroot = root
-                        oldroot[KEY] = key
-                        oldroot[RESULT] = result
-                        root = oldroot[NEXT]
-                        oldkey = root[KEY]
-                        oldresult = root[RESULT]
-                        root[KEY] = root[RESULT] = None
-                        del cache[oldkey]
-                        cache[key] = oldroot
                     else:
-                        last = root[PREV]
-                        link = [last, root, key, result]
-                        last[NEXT] = root[PREV] = cache[key] = link
-                        full = cache_len() >= maxsize
+                        if full:
+                            oldroot = root
+                            oldroot[KEY] = key
+                            oldroot[RESULT] = result
+                            root = oldroot[NEXT]
+                            oldkey = root[KEY]
+                            oldresult = root[RESULT]
+                            root[KEY] = root[RESULT] = None
+                            del cache[oldkey]
+                            cache[key] = oldroot
+                        else:
+                            last = root[PREV]
+                            link = [last, root, key, result]
+                            last[NEXT] = root[PREV] = cache[key] = link
+                            full = cache_len() >= maxsize
                     misses += 1
                 return result
 
@@ -599,21 +489,22 @@ def _c3_merge(sequences):
         sequences = [s for s in sequences if s]
         if not sequences:
             return result
-        for s1 in sequences:
-            candidate = s1[0]
-            for s2 in sequences:
-                if candidate in s2[1:]:
-                    candidate = None
+        else:
+            for s1 in sequences:
+                candidate = s1[0]
+                for s2 in sequences:
+                    if candidate in s2[1:]:
+                        candidate = None
+                        break
+                else:
                     break
-            else:
-                break
 
-        if candidate is None:
-            raise RuntimeError('Inconsistent hierarchy')
-        result.append(candidate)
-        for seq in sequences:
-            if seq[0] == candidate:
-                del seq[0]
+            if candidate is None:
+                raise RuntimeError('Inconsistent hierarchy')
+            result.append(candidate)
+            for seq in sequences:
+                if seq[0] == candidate:
+                    del seq[0]
 
 
 def _c3_mro(cls, abcs=None):
@@ -623,14 +514,14 @@ def _c3_mro(cls, abcs=None):
             break
     else:
         boundary = 0
-
     abcs = list(abcs) if abcs else []
     explicit_bases = list(cls.__bases__[:boundary])
     abstract_bases = []
     other_bases = list(cls.__bases__[boundary:])
     for base in abcs:
         if issubclass(cls, base):
-            any((issubclass(b, base) for b in cls.__bases__)) or abstract_bases.append(base)
+            if not any((issubclass(b, base) for b in cls.__bases__)):
+                abstract_bases.append(base)
 
     for base in abstract_bases:
         abcs.remove(base)
@@ -653,8 +544,9 @@ def _compose_mro(cls, types):
 
     def is_strict_base(typ):
         for other in types:
-            if typ != other and typ in other.__mro__:
-                return True
+            if typ != other:
+                if typ in other.__mro__:
+                    return True
 
         return False
 
@@ -664,17 +556,19 @@ def _compose_mro(cls, types):
     for typ in types:
         found = []
         for sub in typ.__subclasses__():
-            if sub not in bases and issubclass(cls, sub):
-                found.append([s for s in sub.__mro__ if s in type_set])
+            if sub not in bases:
+                if issubclass(cls, sub):
+                    found.append([s for s in sub.__mro__ if s in type_set])
 
         if not found:
             mro.append(typ)
             continue
-        found.sort(key=len, reverse=True)
-        for sub in found:
-            for subcls in sub:
-                if subcls not in mro:
-                    mro.append(subcls)
+        else:
+            found.sort(key=len, reverse=True)
+            for sub in found:
+                for subcls in sub:
+                    if subcls not in mro:
+                        mro.append(subcls)
 
     return _c3_mro(cls, abcs=mro)
 
@@ -689,7 +583,7 @@ def _find_impl(cls, registry):
                     if match not in cls.__mro__:
                         if not issubclass(match, t):
                             raise RuntimeError('Ambiguous dispatch: {} or {}'.format(match, t))
-            break
+                        break
         if t in registry:
             match = t
 
