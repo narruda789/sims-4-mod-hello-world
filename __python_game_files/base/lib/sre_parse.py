@@ -1,5 +1,5 @@
-# uncompyle6 version 3.7.4
-# Python bytecode 3.7 (3394)
+# decompyle3 version 3.9.0
+# Python bytecode version base 3.7.0 (3394)
 # Decompiled from: Python 3.7.9 (tags/v3.7.9:13c94747c7, Aug 17 2020, 18:58:18) [MSC v.1900 64 bit (AMD64)]
 # Embedded file name: T:\InGame\Gameplay\Scripts\Lib\sre_parse.py
 # Compiled at: 2018-06-26 23:07:36
@@ -13,7 +13,7 @@ HEXDIGITS = frozenset('0123456789abcdefABCDEF')
 ASCIILETTERS = frozenset('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 WHITESPACE = frozenset(' \t\n\r\x0b\x0c')
 _REPEATCODES = frozenset({MIN_REPEAT, MAX_REPEAT})
-_UNITCODES = frozenset({ANY, RANGE, IN, LITERAL, NOT_LITERAL, CATEGORY})
+_UNITCODES = frozenset({ANY,RANGE,IN,LITERAL,NOT_LITERAL,CATEGORY})
 ESCAPES = {'\\a':(
   LITERAL, ord('\x07')), 
  '\\b':(
@@ -50,14 +50,15 @@ CATEGORIES = {'\\A':(
   IN, [(CATEGORY, CATEGORY_NOT_WORD)]), 
  '\\Z':(
   AT, AT_END_STRING)}
-FLAGS = {'i':SRE_FLAG_IGNORECASE, 
- 'L':SRE_FLAG_LOCALE, 
- 'm':SRE_FLAG_MULTILINE, 
- 's':SRE_FLAG_DOTALL, 
- 'x':SRE_FLAG_VERBOSE, 
- 'a':SRE_FLAG_ASCII, 
- 't':SRE_FLAG_TEMPLATE, 
- 'u':SRE_FLAG_UNICODE}
+FLAGS = {
+  'i': SRE_FLAG_IGNORECASE,
+  'L': SRE_FLAG_LOCALE,
+  'm': SRE_FLAG_MULTILINE,
+  's': SRE_FLAG_DOTALL,
+  'x': SRE_FLAG_VERBOSE,
+  'a': SRE_FLAG_ASCII,
+  't': SRE_FLAG_TEMPLATE,
+  'u': SRE_FLAG_UNICODE}
 TYPE_FLAGS = SRE_FLAG_ASCII | SRE_FLAG_LOCALE | SRE_FLAG_UNICODE
 GLOBAL_FLAGS = SRE_FLAG_DEBUG | SRE_FLAG_TEMPLATE
 
@@ -123,38 +124,43 @@ class SubPattern:
                 for op, a in av:
                     print((level + 1) * '  ' + str(op), a)
 
-            elif op is BRANCH:
-                print()
-                for i, a in enumerate(av[1]):
-                    if i:
-                        print(level * '  ' + 'OR')
-                    a.dump(level + 1)
-
-            elif op is GROUPREF_EXISTS:
-                condgroup, item_yes, item_no = av
-                print('', condgroup)
-                item_yes.dump(level + 1)
-                if item_no:
-                    print(level * '  ' + 'ELSE')
-                    item_no.dump(level + 1)
-            elif isinstance(av, seqtypes):
-                nl = False
-                for a in av:
-                    if isinstance(a, SubPattern):
-                        if not nl:
-                            print()
-                        a.dump(level + 1)
-                        nl = True
-                    else:
-                        if not nl:
-                            print(' ', end='')
-                        print(a, end='')
-                        nl = False
-
-                if not nl:
-                    print()
             else:
-                print('', av)
+                if op is BRANCH:
+                    print()
+                    for i, a in enumerate(av[1]):
+                        if i:
+                            print(level * '  ' + 'OR')
+                        else:
+                            a.dump(level + 1)
+
+                else:
+                    if op is GROUPREF_EXISTS:
+                        condgroup, item_yes, item_no = av
+                        print('', condgroup)
+                        item_yes.dump(level + 1)
+                        if item_no:
+                            print(level * '  ' + 'ELSE')
+                            item_no.dump(level + 1)
+                    else:
+                        if isinstance(av, seqtypes):
+                            nl = False
+                            for a in av:
+                                if isinstance(a, SubPattern):
+                                    if not nl:
+                                        print()
+                                    else:
+                                        a.dump(level + 1)
+                                        nl = True
+                                else:
+                                    if not nl:
+                                        print(' ', end='')
+                                    print(a, end='')
+                                    nl = False
+
+                            if not nl:
+                                print()
+                        else:
+                            print('', av)
 
     def __repr__(self):
         return repr(self.data)
@@ -194,36 +200,43 @@ class SubPattern:
 
                 lo = lo + i
                 hi = hi + j
-            elif op is CALL:
-                i, j = av.getwidth()
-                lo = lo + i
-                hi = hi + j
-            elif op is SUBPATTERN:
-                i, j = av[(-1)].getwidth()
-                lo = lo + i
-                hi = hi + j
-            elif op in _REPEATCODES:
-                i, j = av[2].getwidth()
-                lo = lo + i * av[0]
-                hi = hi + j * av[1]
-            elif op in _UNITCODES:
-                lo = lo + 1
-                hi = hi + 1
-            elif op is GROUPREF:
-                i, j = self.pattern.groupwidths[av]
-                lo = lo + i
-                hi = hi + j
             else:
-                if op is GROUPREF_EXISTS:
-                    i, j = av[1].getwidth()
-                    if av[2] is not None:
-                        l, h = av[2].getwidth()
-                        i = min(i, l)
-                        j = max(j, h)
-                    else:
-                        i = 0
+                if op is CALL:
+                    i, j = av.getwidth()
                     lo = lo + i
                     hi = hi + j
+                else:
+                    if op is SUBPATTERN:
+                        i, j = av[-1].getwidth()
+                        lo = lo + i
+                        hi = hi + j
+                    else:
+                        if op in _REPEATCODES:
+                            i, j = av[2].getwidth()
+                            lo = lo + i * av[0]
+                            hi = hi + j * av[1]
+                        else:
+                            if op in _UNITCODES:
+                                lo = lo + 1
+                                hi = hi + 1
+                            else:
+                                if op is GROUPREF:
+                                    i, j = self.pattern.groupwidths[av]
+                                    lo = lo + i
+                                    hi = hi + j
+                                else:
+                                    if op is GROUPREF_EXISTS:
+                                        i, j = av[1].getwidth()
+                                        if av[2] is not None:
+                                            l, h = av[2].getwidth()
+                                            i = min(i, l)
+                                            j = max(j, h)
+                                        else:
+                                            i = 0
+                                        lo = lo + i
+                                        hi = hi + j
+            if op is SUCCESS:
+                break
 
         self.width = (
          min(lo, MAXREPEAT - 1), min(hi, MAXREPEAT))
@@ -277,8 +290,9 @@ class Tokenizer:
             c = self.next
             if c not in charset:
                 break
-            result += c
-            self._Tokenizer__next()
+            else:
+                result += c
+                self._Tokenizer__next()
 
         return result
 
@@ -295,7 +309,8 @@ class Tokenizer:
                 if not result:
                     raise self.error('missing group name', 1)
                 break
-            result += c
+            else:
+                result += c
 
         return result
 
@@ -328,15 +343,13 @@ def _class_escape(source, escape):
             escape += source.getwhile(2, HEXDIGITS)
             if len(escape) != 4:
                 raise source.error('incomplete escape %s' % escape, len(escape))
-            return (
-             LITERAL, int(escape[2:], 16))
+            return (LITERAL, int(escape[2:], 16))
         if c == 'u':
             if source.istext:
                 escape += source.getwhile(4, HEXDIGITS)
                 if len(escape) != 6:
                     raise source.error('incomplete escape %s' % escape, len(escape))
-                return (
-                 LITERAL, int(escape[2:], 16))
+                return (LITERAL, int(escape[2:], 16))
         if c == 'U':
             if source.istext:
                 escape += source.getwhile(8, HEXDIGITS)
@@ -344,21 +357,20 @@ def _class_escape(source, escape):
                     raise source.error('incomplete escape %s' % escape, len(escape))
                 c = int(escape[2:], 16)
                 chr(c)
-                return (LITERAL, c)
+                return (
+                 LITERAL, c)
         if c in OCTDIGITS:
             escape += source.getwhile(2, OCTDIGITS)
             c = int(escape[1:], 8)
             if c > 255:
                 raise source.error('octal escape value %s outside of range 0-0o377' % escape, len(escape))
-            return (
-             LITERAL, c)
+            return (LITERAL, c)
         if c in DIGITS:
             raise ValueError
         if len(escape) == 2:
             if c in ASCIILETTERS:
                 raise source.error('bad escape %s' % escape, len(escape))
-            return (
-             LITERAL, ord(escape[1]))
+            return (LITERAL, ord(escape[1]))
     except ValueError:
         pass
 
@@ -378,15 +390,13 @@ def _escape(source, escape, state):
             escape += source.getwhile(2, HEXDIGITS)
             if len(escape) != 4:
                 raise source.error('incomplete escape %s' % escape, len(escape))
-            return (
-             LITERAL, int(escape[2:], 16))
+            return (LITERAL, int(escape[2:], 16))
         if c == 'u':
             if source.istext:
                 escape += source.getwhile(4, HEXDIGITS)
                 if len(escape) != 6:
                     raise source.error('incomplete escape %s' % escape, len(escape))
-                return (
-                 LITERAL, int(escape[2:], 16))
+                return (LITERAL, int(escape[2:], 16))
         if c == 'U':
             if source.istext:
                 escape += source.getwhile(8, HEXDIGITS)
@@ -394,33 +404,35 @@ def _escape(source, escape, state):
                     raise source.error('incomplete escape %s' % escape, len(escape))
                 c = int(escape[2:], 16)
                 chr(c)
-                return (LITERAL, c)
+                return (
+                 LITERAL, c)
         if c == '0':
             escape += source.getwhile(2, OCTDIGITS)
-            return (LITERAL, int(escape[1:], 8))
+            return (
+             LITERAL, int(escape[1:], 8))
         if c in DIGITS:
             if source.next in DIGITS:
                 escape += source.get()
-                if escape[1] in OCTDIGITS and escape[2] in OCTDIGITS:
-                    if source.next in OCTDIGITS:
-                        escape += source.get()
-                        c = int(escape[1:], 8)
-                        if c > 255:
-                            raise source.error('octal escape value %s outside of range 0-0o377' % escape, len(escape))
-                        return (
-                         LITERAL, c)
+                if escape[1] in OCTDIGITS:
+                    if escape[2] in OCTDIGITS:
+                        if source.next in OCTDIGITS:
+                            escape += source.get()
+                            c = int(escape[1:], 8)
+                            if c > 255:
+                                raise source.error('octal escape value %s outside of range 0-0o377' % escape, len(escape))
+                            return (LITERAL, c)
             group = int(escape[1:])
             if group < state.groups:
                 if not state.checkgroup(group):
                     raise source.error('cannot refer to an open group', len(escape))
                 state.checklookbehindgroup(group, source)
-                return (GROUPREF, group)
+                return (
+                 GROUPREF, group)
             raise source.error('invalid group reference %d' % group, len(escape) - 1)
         if len(escape) == 2:
             if c in ASCIILETTERS:
                 raise source.error('bad escape %s' % escape, len(escape))
-            return (
-             LITERAL, ord(escape[1]))
+            return (LITERAL, ord(escape[1]))
     except ValueError:
         pass
 
@@ -456,35 +468,35 @@ def _parse_sub(source, state, verbose, nested):
         for item in items:
             if not item:
                 break
+            if prefix is None:
+                prefix = item[0]
             else:
-                if prefix is None:
-                    prefix = item[0]
-            if item[0] != prefix:
-                break
+                if item[0] != prefix:
+                    break
         else:
             for item in items:
                 del item[0]
 
             subpattern.append(prefix)
             continue
-
         break
 
     set = []
     for item in items:
         if len(item) != 1:
             break
-        op, av = item[0]
+        else:
+            op, av = item[0]
         if op is LITERAL:
             set.append((op, av))
-        elif op is IN and av[0][0] is not NEGATE:
-            set.extend(av)
         else:
-            break
+            if op is IN and av[0][0] is not NEGATE:
+                set.extend(av)
+            else:
+                break
     else:
         subpattern.append((IN, _uniq(set)))
         return subpattern
-
     subpattern.append((BRANCH, (None, items)))
     return subpattern
 
@@ -515,8 +527,27 @@ def _parse--- This code section failed: ---
                32  STORE_FAST               '_ord'
 
  L. 486     34_36  SETUP_LOOP         3128  'to 3128'
-             38_0  COME_FROM          2810  '2810'
-             38_1  COME_FROM          2806  '2806'
+             38_0  COME_FROM          3124  '3124'
+             38_1  COME_FROM          3108  '3108'
+             38_2  COME_FROM          3084  '3084'
+             38_3  COME_FROM          3060  '3060'
+             38_4  COME_FROM          2816  '2816'
+             38_5  COME_FROM          2810  '2810'
+             38_6  COME_FROM          2806  '2806'
+             38_7  COME_FROM          2674  '2674'
+             38_8  COME_FROM          2304  '2304'
+             38_9  COME_FROM          2286  '2286'
+            38_10  COME_FROM          2068  '2068'
+            38_11  COME_FROM          1928  '1928'
+            38_12  COME_FROM          1618  '1618'
+            38_13  COME_FROM          1594  '1594'
+            38_14  COME_FROM          1248  '1248'
+            38_15  COME_FROM          1116  '1116'
+            38_16  COME_FROM           988  '988'
+            38_17  COME_FROM           182  '182'
+            38_18  COME_FROM           156  '156'
+            38_19  COME_FROM           122  '122'
+            38_20  COME_FROM            82  '82'
 
  L. 488        38  LOAD_FAST                'source'
                40  LOAD_ATTR                next
@@ -559,7 +590,8 @@ def _parse--- This code section failed: ---
                90  POP_JUMP_IF_FALSE   124  'to 124'
 
  L. 500        92  SETUP_LOOP          122  'to 122'
-             94_0  COME_FROM           114  '114'
+             94_0  COME_FROM           118  '118'
+             94_1  COME_FROM           114  '114'
 
  L. 501        94  LOAD_FAST                'sourceget'
                96  CALL_FUNCTION_0       0  '0 positional arguments'
@@ -572,11 +604,11 @@ def _parse--- This code section failed: ---
               108  LOAD_FAST                'this'
               110  LOAD_STR                 '\n'
               112  COMPARE_OP               ==
-              114  POP_JUMP_IF_FALSE    94  'to 94'
+              114  POP_JUMP_IF_FALSE_LOOP    94  'to 94'
             116_0  COME_FROM           106  '106'
 
  L. 503       116  BREAK_LOOP       
-              118  JUMP_BACK            94  'to 94'
+              118  JUMP_LOOP            94  'to 94'
               120  POP_BLOCK        
             122_0  COME_FROM_LOOP       92  '92'
 
@@ -602,7 +634,7 @@ def _parse--- This code section failed: ---
               150  LOAD_FAST                'code'
               152  CALL_FUNCTION_1       1  '1 positional argument'
               154  POP_TOP          
-              156  JUMP_BACK            38  'to 38'
+              156  JUMP_LOOP            38  'to 38'
             158_0  COME_FROM           134  '134'
 
  L. 510       158  LOAD_FAST                'this'
@@ -618,7 +650,7 @@ def _parse--- This code section failed: ---
               176  BUILD_TUPLE_2         2 
               178  CALL_FUNCTION_1       1  '1 positional argument'
               180  POP_TOP          
-              182  JUMP_BACK            38  'to 38'
+              182  JUMP_LOOP            38  'to 38'
             184_0  COME_FROM           164  '164'
 
  L. 513       184  LOAD_FAST                'this'
@@ -675,6 +707,8 @@ def _parse--- This code section failed: ---
               270  STORE_FAST               'negate'
 
  L. 528   272_274  SETUP_LOOP          872  'to 872'
+            276_0  COME_FROM           866  '866'
+            276_1  COME_FROM           830  '830'
 
  L. 529       276  LOAD_FAST                'sourceget'
               278  CALL_FUNCTION_0       0  '0 positional arguments'
@@ -1005,7 +1039,7 @@ def _parse--- This code section failed: ---
               824  BUILD_TUPLE_2         2 
               826  CALL_FUNCTION_1       1  '1 positional argument'
               828  POP_TOP          
-              830  JUMP_BACK           276  'to 276'
+              830  JUMP_LOOP           276  'to 276'
             832_0  COME_FROM           490  '490'
 
  L. 583       832  LOAD_FAST                'code1'
@@ -1027,7 +1061,7 @@ def _parse--- This code section failed: ---
               860  LOAD_FAST                'code1'
               862  CALL_FUNCTION_1       1  '1 positional argument'
               864  POP_TOP          
-          866_868  JUMP_BACK           276  'to 276'
+          866_868  JUMP_LOOP           276  'to 276'
               870  POP_BLOCK        
             872_0  COME_FROM_LOOP      272  '272'
 
@@ -1098,7 +1132,7 @@ def _parse--- This code section failed: ---
               984  CALL_FUNCTION_1       1  '1 positional argument'
               986  POP_TOP          
             988_0  COME_FROM           952  '952'
-              988  JUMP_BACK            38  'to 38'
+              988  JUMP_LOOP            38  'to 38'
             990_0  COME_FROM           190  '190'
 
  L. 602       990  LOAD_FAST                'this'
@@ -1184,6 +1218,7 @@ def _parse--- This code section failed: ---
              1134  STORE_FAST               'hi'
 
  L. 619      1136  SETUP_LOOP         1166  'to 1166'
+           1138_0  COME_FROM          1160  '1160'
              1138  LOAD_FAST                'source'
              1140  LOAD_ATTR                next
              1142  LOAD_GLOBAL              DIGITS
@@ -1195,7 +1230,7 @@ def _parse--- This code section failed: ---
              1154  CALL_FUNCTION_0       0  '0 positional arguments'
              1156  INPLACE_ADD      
              1158  STORE_FAST               'lo'
-         1160_1162  JUMP_BACK          1138  'to 1138'
+         1160_1162  JUMP_LOOP          1138  'to 1138'
            1164_0  COME_FROM          1146  '1146'
              1164  POP_BLOCK        
            1166_0  COME_FROM_LOOP     1136  '1136'
@@ -1206,6 +1241,7 @@ def _parse--- This code section failed: ---
          1172_1174  POP_JUMP_IF_FALSE  1208  'to 1208'
 
  L. 622      1176  SETUP_LOOP         1212  'to 1212'
+           1178_0  COME_FROM          1200  '1200'
              1178  LOAD_FAST                'source'
              1180  LOAD_ATTR                next
              1182  LOAD_GLOBAL              DIGITS
@@ -1217,7 +1253,7 @@ def _parse--- This code section failed: ---
              1194  CALL_FUNCTION_0       0  '0 positional arguments'
              1196  INPLACE_ADD      
              1198  STORE_FAST               'hi'
-         1200_1202  JUMP_BACK          1178  'to 1178'
+         1200_1202  JUMP_LOOP          1178  'to 1178'
            1204_0  COME_FROM          1186  '1186'
              1204  POP_BLOCK        
              1206  JUMP_FORWARD       1212  'to 1212'
@@ -1457,7 +1493,7 @@ def _parse--- This code section failed: ---
              1590  LOAD_CONST               -1
              1592  STORE_SUBSCR     
            1594_0  COME_FROM          1574  '1574'
-             1594  JUMP_BACK            38  'to 38'
+             1594  JUMP_LOOP            38  'to 38'
            1596_0  COME_FROM           996  '996'
 
  L. 664      1596  LOAD_FAST                'this'
@@ -1471,7 +1507,7 @@ def _parse--- This code section failed: ---
              1612  BUILD_TUPLE_2         2 
              1614  CALL_FUNCTION_1       1  '1 positional argument'
              1616  POP_TOP          
-             1618  JUMP_BACK            38  'to 38'
+             1618  JUMP_LOOP            38  'to 38'
            1620_0  COME_FROM          1602  '1602'
 
  L. 667      1620  LOAD_FAST                'this'
@@ -1706,7 +1742,8 @@ def _parse--- This code section failed: ---
          2010_2012  POP_JUMP_IF_FALSE  2074  'to 2074'
 
  L. 714      2014  SETUP_LOOP         2068  'to 2068'
-           2016_0  COME_FROM          2056  '2056'
+           2016_0  COME_FROM          2062  '2062'
+           2016_1  COME_FROM          2056  '2056'
 
  L. 715      2016  LOAD_FAST                'source'
              2018  LOAD_ATTR                next
@@ -1731,10 +1768,10 @@ def _parse--- This code section failed: ---
              2050  CALL_FUNCTION_0       0  '0 positional arguments'
              2052  LOAD_STR                 ')'
              2054  COMPARE_OP               ==
-         2056_2058  POP_JUMP_IF_FALSE  2016  'to 2016'
+         2056_2058  POP_JUMP_IF_FALSE_LOOP  2016  'to 2016'
 
  L. 719      2060  BREAK_LOOP       
-         2062_2064  JUMP_BACK          2016  'to 2016'
+         2062_2064  JUMP_LOOP          2016  'to 2016'
              2066  POP_BLOCK        
            2068_0  COME_FROM_LOOP     2014  '2014'
 
@@ -1867,7 +1904,7 @@ def _parse--- This code section failed: ---
              2280  BUILD_TUPLE_2         2 
              2282  CALL_FUNCTION_1       1  '1 positional argument'
              2284  POP_TOP          
-             2286  JUMP_BACK            38  'to 38'
+             2286  JUMP_LOOP            38  'to 38'
            2288_0  COME_FROM          2266  '2266'
 
  L. 746      2288  LOAD_FAST                'subpatternappend'
@@ -2175,12 +2212,11 @@ def _parse--- This code section failed: ---
 
  L. 798      2798  LOAD_FAST                'state'
              2800  LOAD_ATTR                flags
-           2802_0  COME_FROM          1930  '1930'
              2802  LOAD_GLOBAL              SRE_FLAG_VERBOSE
              2804  BINARY_AND       
-             2806  POP_JUMP_IF_FALSE    38  'to 38'
+             2806  POP_JUMP_IF_FALSE_LOOP    38  'to 38'
              2808  LOAD_FAST                'verbose'
-             2810  POP_JUMP_IF_TRUE     38  'to 38'
+             2810  POP_JUMP_IF_TRUE_LOOP    38  'to 38'
 
  L. 799      2812  LOAD_GLOBAL              Verbose
              2814  RAISE_VARARGS_1       1  'exception instance'
@@ -2217,7 +2253,9 @@ def _parse--- This code section failed: ---
            2856_3  COME_FROM          2070  '2070'
            2856_4  COME_FROM          2000  '2000'
            2856_5  COME_FROM          1982  '1982'
-           2856_6  COME_FROM          1664  '1664'
+           2856_6  COME_FROM          1930  '1930'
+           2856_7  COME_FROM          1762  '1762'
+           2856_8  COME_FROM          1664  '1664'
 
  L. 809      2856  LOAD_FAST                'group'
              2858  LOAD_CONST               None
@@ -2338,7 +2376,7 @@ def _parse--- This code section failed: ---
              3054  BUILD_TUPLE_2         2 
              3056  CALL_FUNCTION_1       1  '1 positional argument'
              3058  POP_TOP          
-             3060  JUMP_BACK            38  'to 38'
+             3060  JUMP_LOOP            38  'to 38'
            3062_0  COME_FROM          1626  '1626'
 
  L. 824      3062  LOAD_FAST                'this'
@@ -2352,7 +2390,7 @@ def _parse--- This code section failed: ---
              3078  BUILD_TUPLE_2         2 
              3080  CALL_FUNCTION_1       1  '1 positional argument'
              3082  POP_TOP          
-             3084  JUMP_BACK            38  'to 38'
+             3084  JUMP_LOOP            38  'to 38'
            3086_0  COME_FROM          3068  '3068'
 
  L. 827      3086  LOAD_FAST                'this'
@@ -2366,7 +2404,7 @@ def _parse--- This code section failed: ---
              3102  BUILD_TUPLE_2         2 
              3104  CALL_FUNCTION_1       1  '1 positional argument'
              3106  POP_TOP          
-             3108  JUMP_BACK            38  'to 38'
+             3108  JUMP_LOOP            38  'to 38'
            3110_0  COME_FROM          3092  '3092'
 
  L. 831      3110  LOAD_GLOBAL              AssertionError
@@ -2376,7 +2414,7 @@ def _parse--- This code section failed: ---
              3118  BINARY_MODULO    
              3120  CALL_FUNCTION_1       1  '1 positional argument'
              3122  RAISE_VARARGS_1       1  'exception instance'
-             3124  JUMP_BACK            38  'to 38'
+             3124  JUMP_LOOP            38  'to 38'
              3126  POP_BLOCK        
            3128_0  COME_FROM_LOOP       34  '34'
 
@@ -2392,10 +2430,11 @@ def _parse--- This code section failed: ---
              3146  BUILD_SLICE_3         3 
              3148  BINARY_SUBSCR    
              3150  GET_ITER         
-           3152_0  COME_FROM          3208  '3208'
-           3152_1  COME_FROM          3202  '3202'
-           3152_2  COME_FROM          3196  '3196'
-           3152_3  COME_FROM          3174  '3174'
+           3152_0  COME_FROM          3228  '3228'
+           3152_1  COME_FROM          3208  '3208'
+           3152_2  COME_FROM          3202  '3202'
+           3152_3  COME_FROM          3196  '3196'
+           3152_4  COME_FROM          3174  '3174'
              3152  FOR_ITER           3232  'to 3232'
              3154  STORE_FAST               'i'
 
@@ -2409,7 +2448,7 @@ def _parse--- This code section failed: ---
  L. 836      3168  LOAD_FAST                'op'
              3170  LOAD_GLOBAL              SUBPATTERN
              3172  COMPARE_OP               is
-         3174_3176  POP_JUMP_IF_FALSE  3152  'to 3152'
+         3174_3176  POP_JUMP_IF_FALSE_LOOP  3152  'to 3152'
 
  L. 837      3178  LOAD_FAST                'av'
              3180  UNPACK_SEQUENCE_4     4 
@@ -2421,11 +2460,11 @@ def _parse--- This code section failed: ---
  L. 838      3190  LOAD_FAST                'group'
              3192  LOAD_CONST               None
              3194  COMPARE_OP               is
-         3196_3198  POP_JUMP_IF_FALSE  3152  'to 3152'
+         3196_3198  POP_JUMP_IF_FALSE_LOOP  3152  'to 3152'
              3200  LOAD_FAST                'add_flags'
-         3202_3204  POP_JUMP_IF_TRUE   3152  'to 3152'
+         3202_3204  POP_JUMP_IF_TRUE_LOOP  3152  'to 3152'
              3206  LOAD_FAST                'del_flags'
-         3208_3210  POP_JUMP_IF_TRUE   3152  'to 3152'
+         3208_3210  POP_JUMP_IF_TRUE_LOOP  3152  'to 3152'
 
  L. 839      3212  LOAD_FAST                'p'
              3214  LOAD_FAST                'subpattern'
@@ -2435,7 +2474,7 @@ def _parse--- This code section failed: ---
              3222  BINARY_ADD       
              3224  BUILD_SLICE_2         2 
              3226  STORE_SUBSCR     
-         3228_3230  JUMP_BACK          3152  'to 3152'
+         3228_3230  JUMP_LOOP          3152  'to 3152'
              3232  POP_BLOCK        
            3234_0  COME_FROM_LOOP     3128  '3128'
 
@@ -2443,7 +2482,7 @@ def _parse--- This code section failed: ---
              3236  RETURN_VALUE     
                -1  RETURN_LAST      
 
-Parse error at or near `COME_FROM' instruction at offset 2802_0
+Parse error at or near `LOAD_FAST' instruction at offset 484
 
 
 def _parse_flags(source, state, char):
@@ -2451,15 +2490,16 @@ def _parse_flags(source, state, char):
     add_flags = 0
     del_flags = 0
     if char != '-':
-        while 1:
+        while True:
             flag = FLAGS[char]
             if source.istext:
                 if char == 'L':
                     msg = "bad inline flags: cannot use 'L' flag with a str pattern"
                     raise source.error(msg)
-            elif char == 'u':
-                msg = "bad inline flags: cannot use 'u' flag with a bytes pattern"
-                raise source.error(msg)
+            else:
+                if char == 'u':
+                    msg = "bad inline flags: cannot use 'u' flag with a bytes pattern"
+                    raise source.error(msg)
             add_flags |= flag
             if flag & TYPE_FLAGS:
                 if add_flags & TYPE_FLAGS != flag:
@@ -2474,39 +2514,39 @@ def _parse_flags(source, state, char):
                 msg = 'unknown flag' if char.isalpha() else 'missing -, : or )'
                 raise source.error(msg, len(char))
 
-    if char == ')':
-        state.flags |= add_flags
-        return
-    if add_flags & GLOBAL_FLAGS:
-        raise source.error('bad inline flags: cannot turn on global flag', 1)
-    if char == '-':
-        char = sourceget()
-        if char is None:
-            raise source.error('missing flag')
-        if char not in FLAGS:
-            msg = 'unknown flag' if char.isalpha() else 'missing flag'
-            raise source.error(msg, len(char))
-        while 1:
-            flag = FLAGS[char]
-            if flag & TYPE_FLAGS:
-                msg = "bad inline flags: cannot turn off flags 'a', 'u' and 'L'"
-                raise source.error(msg)
-            del_flags |= flag
+        if char == ')':
+            state.flags |= add_flags
+            return
+        if add_flags & GLOBAL_FLAGS:
+            raise source.error('bad inline flags: cannot turn on global flag', 1)
+        if char == '-':
             char = sourceget()
             if char is None:
-                raise source.error('missing :')
-            if char == ':':
-                break
+                raise source.error('missing flag')
             if char not in FLAGS:
-                msg = 'unknown flag' if char.isalpha() else 'missing :'
+                msg = 'unknown flag' if char.isalpha() else 'missing flag'
                 raise source.error(msg, len(char))
+            while True:
+                flag = FLAGS[char]
+                if flag & TYPE_FLAGS:
+                    msg = "bad inline flags: cannot turn off flags 'a', 'u' and 'L'"
+                    raise source.error(msg)
+                del_flags |= flag
+                char = sourceget()
+                if char is None:
+                    raise source.error('missing :')
+                if char == ':':
+                    break
+                if char not in FLAGS:
+                    msg = 'unknown flag' if char.isalpha() else 'missing :'
+                    raise source.error(msg, len(char))
 
-    if del_flags & GLOBAL_FLAGS:
-        raise source.error('bad inline flags: cannot turn off global flag', 1)
-    if add_flags & del_flags:
-        raise source.error('bad inline flags: flag turned on and off', 1)
-    return (
-     add_flags, del_flags)
+            if del_flags & GLOBAL_FLAGS:
+                raise source.error('bad inline flags: cannot turn off global flag', 1)
+            if add_flags & del_flags:
+                raise source.error('bad inline flags: flag turned on and off', 1)
+        return (
+         add_flags, del_flags)
 
 
 def fix_flags(src, flags):
@@ -2515,9 +2555,8 @@ def fix_flags(src, flags):
             raise ValueError('cannot use LOCALE flag with a str pattern')
         if not flags & SRE_FLAG_ASCII:
             flags |= SRE_FLAG_UNICODE
-        elif flags & SRE_FLAG_UNICODE:
-            raise ValueError('ASCII and UNICODE flags are incompatible')
-    else:
+        else:
+flags & SRE_FLAG_UNICODEValueError'ASCII and UNICODE flags are incompatible'    else:
         if flags & SRE_FLAG_UNICODE:
             raise ValueError('cannot use UNICODE flag with a bytes pattern')
         if flags & SRE_FLAG_LOCALE:
@@ -2567,7 +2606,7 @@ def parse_template(source, pattern):
         literals.append(None)
 
     groupindex = pattern.groupindex
-    while True:
+    while 1:
         this = sget()
         if this is None:
             break
@@ -2594,34 +2633,38 @@ def parse_template(source, pattern):
 
                     if index >= MAXGROUPS:
                         raise s.error('invalid group reference %d' % index, len(name) + 1)
-                    addgroup(index, len(name) + 1)
-            elif c == '0':
-                if s.next in OCTDIGITS:
-                    this += sget()
+                addgroup(index, len(name) + 1)
+            else:
+                if c == '0':
                     if s.next in OCTDIGITS:
                         this += sget()
-                lappend(chr(int(this[1:], 8) & 255))
-            elif c in DIGITS:
-                isoctal = False
-                if s.next in DIGITS:
-                    this += sget()
-                    if c in OCTDIGITS and this[2] in OCTDIGITS:
                         if s.next in OCTDIGITS:
                             this += sget()
-                            isoctal = True
-                            c = int(this[1:], 8)
-                            if c > 255:
-                                raise s.error('octal escape value %s outside of range 0-0o377' % this, len(this))
-                            lappend(chr(c))
-                isoctal or addgroup(int(this[1:]), len(this) - 1)
-            else:
-                try:
-                    this = chr(ESCAPES[this][1])
-                except KeyError:
-                    if c in ASCIILETTERS:
-                        raise s.error('bad escape %s' % this, len(this))
+                    lappend(chr(int(this[1:], 8) & 255))
+                else:
+                    if c in DIGITS:
+                        isoctal = False
+                        if s.next in DIGITS:
+                            this += sget()
+                            if c in OCTDIGITS:
+                                if this[2] in OCTDIGITS:
+                                    if s.next in OCTDIGITS:
+                                        this += sget()
+                                        isoctal = True
+                                        c = int(this[1:], 8)
+                                        if c > 255:
+                                            raise s.error('octal escape value %s outside of range 0-0o377' % this, len(this))
+                                        lappend(chr(c))
+                        if not isoctal:
+                            addgroup(int(this[1:]), len(this) - 1)
+                    else:
+                        try:
+                            this = chr(ESCAPES[this][1])
+                        except KeyError:
+                            if c in ASCIILETTERS:
+                                raise s.error('bad escape %s' % this, len(this))
 
-                lappend(this)
+                        lappend(this)
         else:
             lappend(this)
 
@@ -2629,8 +2672,7 @@ def parse_template(source, pattern):
         literals.append(''.join(literal))
     if not isinstance(source, str):
         literals = [None if s is None else s.encode('latin-1') for s in literals]
-    return (
-     groups, literals)
+    return (groups, literals)
 
 
 def expand_template(template, match):
