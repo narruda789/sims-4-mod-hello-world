@@ -151,7 +151,7 @@ _convert = {'__lt__':[
    '__lt__', _lt_from_ge)]}
 
 def total_ordering(cls):
-    roots = {op for op in  if getattr(cls, op, None) is not getattr(object, op, None)}
+    roots = {op for op in _convert if getattr(cls, op, None) is not getattr(object, op, None)}
     if not roots:
         raise ValueError('must define at least one ordering operation: < > <= >=')
     root = max(roots)
