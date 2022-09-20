@@ -1,33 +1,47 @@
-# uncompyle6 version 3.7.4
-# Python bytecode 3.7 (3394)
-# Decompiled from: Python 3.7.9 (tags/v3.7.9:13c94747c7, Aug 17 2020, 18:58:18) [MSC v.1900 64 bit (AMD64)]
-# Embedded file name: T:\InGame\Gameplay\Scripts\Lib\encodings\uu_codec.py
-# Compiled at: 2018-06-26 23:07:36
-# Size of source mod 2**32: 2820 bytes
-import codecs, binascii
+"""Python 'uu_codec' Codec - UU content transfer encoding.
+
+This codec de/encodes from bytes to bytes.
+
+Written by Marc-Andre Lemburg (mal@lemburg.com). Some details were
+adapted from uu.py which was written by Lance Ellinghouse and
+modified by Jack Jansen and Fredrik Lundh.
+"""
+
+import codecs
+import binascii
 from io import BytesIO
 
-def uu_encode(input, errors='strict', filename='<data>', mode=438):
+### Codec APIs
+
+def uu_encode(input, errors='strict', filename='<data>', mode=0o666):
+    assert errors == 'strict'
     infile = BytesIO(input)
     outfile = BytesIO()
     read = infile.read
     write = outfile.write
-    write(('begin %o %s\n' % (mode & 511, filename)).encode('ascii'))
+
+    # Remove newline chars from filename
+    filename = filename.replace('\n','\\n')
+    filename = filename.replace('\r','\\r')
+
+    # Encode
+    write(('begin %o %s\n' % (mode & 0o777, filename)).encode('ascii'))
     chunk = read(45)
     while chunk:
         write(binascii.b2a_uu(chunk))
         chunk = read(45)
-
     write(b' \nend\n')
-    return (
-     outfile.getvalue(), len(input))
 
+    return (outfile.getvalue(), len(input))
 
 def uu_decode(input, errors='strict'):
+    assert errors == 'strict'
     infile = BytesIO(input)
     outfile = BytesIO()
     readline = infile.readline
     write = outfile.write
+
+    # Find start of encoded data
     while 1:
         s = readline()
         if not s:
@@ -35,6 +49,7 @@ def uu_decode(input, errors='strict'):
         if s[:5] == b'begin':
             break
 
+    # Decode
     while True:
         s = readline()
         if not s or s == b'end\n':
@@ -42,55 +57,47 @@ def uu_decode(input, errors='strict'):
         try:
             data = binascii.a2b_uu(s)
         except binascii.Error as v:
-            try:
-                nbytes = ((s[0] - 32 & 63) * 4 + 5) // 3
-                data = binascii.a2b_uu(s[:nbytes])
-            finally:
-                v = None
-                del v
-
+            # Workaround for broken uuencoders by /Fredrik Lundh
+            nbytes = (((s[0]-32) & 63) * 4 + 5) // 3
+            data = binascii.a2b_uu(s[:nbytes])
+            #sys.stderr.write("Warning: %s\n" % str(v))
         write(data)
-
     if not s:
         raise ValueError('Truncated input data')
+
     return (outfile.getvalue(), len(input))
 
-
 class Codec(codecs.Codec):
-
     def encode(self, input, errors='strict'):
         return uu_encode(input, errors)
 
     def decode(self, input, errors='strict'):
         return uu_decode(input, errors)
 
-
 class IncrementalEncoder(codecs.IncrementalEncoder):
-
     def encode(self, input, final=False):
         return uu_encode(input, self.errors)[0]
 
-
 class IncrementalDecoder(codecs.IncrementalDecoder):
-
     def decode(self, input, final=False):
         return uu_decode(input, self.errors)[0]
-
 
 class StreamWriter(Codec, codecs.StreamWriter):
     charbuffertype = bytes
 
-
 class StreamReader(Codec, codecs.StreamReader):
     charbuffertype = bytes
 
+### encodings module API
 
 def getregentry():
-    return codecs.CodecInfo(name='uu',
-      encode=uu_encode,
-      decode=uu_decode,
-      incrementalencoder=IncrementalEncoder,
-      incrementaldecoder=IncrementalDecoder,
-      streamreader=StreamReader,
-      streamwriter=StreamWriter,
-      _is_text_encoding=False)
+    return codecs.CodecInfo(
+        name='uu',
+        encode=uu_encode,
+        decode=uu_decode,
+        incrementalencoder=IncrementalEncoder,
+        incrementaldecoder=IncrementalDecoder,
+        streamreader=StreamReader,
+        streamwriter=StreamWriter,
+        _is_text_encoding=False,
+    )

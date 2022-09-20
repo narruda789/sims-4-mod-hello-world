@@ -1,15 +1,18 @@
-# uncompyle6 version 3.7.4
-# Python bytecode 3.7 (3394)
-# Decompiled from: Python 3.7.9 (tags/v3.7.9:13c94747c7, Aug 17 2020, 18:58:18) [MSC v.1900 64 bit (AMD64)]
-# Embedded file name: T:\InGame\Gameplay\Scripts\Lib\unittest\__main__.py
-# Compiled at: 2018-06-26 23:07:36
-# Size of source mod 2**32: 490 bytes
+"""Main entry point"""
+
 import sys
-if sys.argv[0].endswith('__main__.py'):
+if sys.argv[0].endswith("__main__.py"):
     import os.path
+    # We change sys.argv[0] to make help message more useful
+    # use executable without path, unquoted
+    # (it's just a hint anyway)
+    # (if you have spaces in your executable you get what you deserve!)
     executable = os.path.basename(sys.executable)
-    sys.argv[0] = executable + ' -m unittest'
+    sys.argv[0] = executable + " -m unittest"
     del os
+
 __unittest = True
+
 from .main import main
+
 main(module=None)

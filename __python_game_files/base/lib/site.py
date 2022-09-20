@@ -4,12 +4,17 @@
 # Embedded file name: T:\InGame\Gameplay\Scripts\Lib\site.py
 # Compiled at: 2018-06-26 23:07:36
 # Size of source mod 2**32: 21604 bytes
-import sys, os, builtins, _sitebuiltins
+import _sitebuiltins
+import builtins
+import os
+import sys
+
 PREFIXES = [
- sys.prefix, sys.exec_prefix]
+    sys.prefix, sys.exec_prefix]
 ENABLE_USER_SITE = None
 USER_SITE = None
 USER_BASE = None
+
 
 def makepath(*paths):
     dir = (os.path.join)(*paths)
@@ -232,9 +237,11 @@ def setquit():
 def setcopyright():
     builtins.copyright = _sitebuiltins._Printer('copyright', sys.copyright)
     if sys.platform[:4] == 'java':
-        builtins.credits = _sitebuiltins._Printer('credits', 'Jython is maintained by the Jython developers (www.jython.org).')
+        builtins.credits = _sitebuiltins._Printer('credits',
+                                                  'Jython is maintained by the Jython developers (www.jython.org).')
     else:
-        builtins.credits = _sitebuiltins._Printer('credits', '    Thanks to CWI, CNRI, BeOpen.com, Zope Corporation and a cast of thousands\n    for supporting Python development.  See www.python.org for more information.')
+        builtins.credits = _sitebuiltins._Printer('credits',
+                                                  '    Thanks to CWI, CNRI, BeOpen.com, Zope Corporation and a cast of thousands\n    for supporting Python development.  See www.python.org for more information.')
     files, dirs = [], []
     if hasattr(os, '__file__'):
         here = os.path.dirname(os.__file__)
@@ -248,7 +255,6 @@ def sethelper():
 
 
 def enablerlcompleter():
-
     def register_readline():
         import atexit
         try:
@@ -292,8 +298,8 @@ def venv(known_paths):
         sys._home = None
         conf_basename = 'pyvenv.cfg'
         candidate_confs = [conffile for conffile in (
-         os.path.join(exe_dir, conf_basename),
-         os.path.join(site_prefix, conf_basename)) if os.path.isfile(conffile)]
+            os.path.join(exe_dir, conf_basename),
+            os.path.join(site_prefix, conf_basename)) if os.path.isfile(conffile)]
         if candidate_confs:
             virtual_conf = candidate_confs[0]
             system_site = 'true'
@@ -314,7 +320,7 @@ def venv(known_paths):
                 PREFIXES.insert(0, sys.prefix)
     else:
         PREFIXES = [
-         sys.prefix]
+            sys.prefix]
         ENABLE_USER_SITE = False
     return known_paths
 
@@ -339,7 +345,7 @@ def execsitecustomize():
                 (sys.excepthook)(*sys.exc_info())
             else:
                 sys.stderr.write('Error in sitecustomize; set PYTHONVERBOSE for traceback:\n%s: %s\n' % (
-                 err.__class__.__name__, err))
+                    err.__class__.__name__, err))
         finally:
             err = None
             del err
@@ -365,7 +371,7 @@ def execusercustomize():
                 (sys.excepthook)(*sys.exc_info())
             else:
                 sys.stderr.write('Error in usercustomize; set PYTHONVERBOSE for traceback:\n%s: %s\n' % (
-                 err.__class__.__name__, err))
+                    err.__class__.__name__, err))
         finally:
             err = None
             del err
@@ -395,6 +401,7 @@ def main():
 if not sys.flags.no_site:
     main()
 
+
 def _script():
     help = "    %s [--user-base] [--user-site]\n\n    Without arguments print some useful information\n    With arguments print the value of USER_BASE and/or USER_SITE separated\n    by '%s'.\n\n    Exit codes with --user-base or --user-site:\n      0 - user site directory is enabled\n      1 - user site directory is disabled by user\n      2 - uses site directory is disabled by super user\n          or for security reasons\n     >2 - unknown error\n    "
     args = sys.argv[1:]
@@ -407,9 +414,9 @@ def _script():
 
         print(']')
         print('USER_BASE: %r (%s)' % (user_base,
-         'exists' if os.path.isdir(user_base) else "doesn't exist"))
+                                      'exists' if os.path.isdir(user_base) else "doesn't exist"))
         print('USER_SITE: %r (%s)' % (user_site,
-         'exists' if os.path.isdir(user_site) else "doesn't exist"))
+                                      'exists' if os.path.isdir(user_site) else "doesn't exist"))
         print('ENABLE_USER_SITE: %r' % ENABLE_USER_SITE)
         sys.exit(0)
     else:
