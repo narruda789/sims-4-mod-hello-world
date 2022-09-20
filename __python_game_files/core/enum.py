@@ -4,12 +4,15 @@
 # Embedded file name: T:\InGame\Gameplay\Scripts\Core\enum.py
 # Compiled at: 2020-02-05 22:30:39
 # Size of source mod 2**32: 11526 bytes
+import collections
+import sims4.log
 from contextlib import contextmanager
-import collections, sims4.log
+
 __all__ = [
- 'Metaclass','EnumBase','Int','IntFlags','LongFlags','IntEnum']
+    'Metaclass', 'EnumBase', 'Int', 'IntFlags', 'LongFlags', 'IntEnum']
 __unittest__ = ['test.enum_test']
 logger = sims4.log.Logger('Enum')
+
 
 class Metaclass(type):
 
@@ -33,7 +36,8 @@ class Metaclass(type):
 
     def __new__(meta, classname, bases, class_dict, **kwargs):
         underlying_type = getattr(bases[0], 'underlying_type', bases[0])
-        class_enum_values = [(k, v) for k, v in class_dict.items() if not v is ... if not type(v) == underlying_type if isinstance(type(v), Metaclass)]
+        class_enum_values = [(k, v) for k, v in class_dict.items() if not v is ... if not type(v) == underlying_type if
+                             isinstance(type(v), Metaclass)]
         class_dict.update(kwargs)
         class_dict['__slots__'] = ()
         class_dict['_mutable'] = True
@@ -162,7 +166,7 @@ class EnumBase(int, metaclass=Metaclass, locked=False, export=True, display_sort
 
     def __reduce__(self):
         return (
-         type(self), (self.value,))
+            type(self), (self.value,))
 
 
 class Int(EnumBase):
@@ -194,6 +198,7 @@ class Int(EnumBase):
 
 
 IntEnum = Int
+
 
 class IntFlags(Int):
 
